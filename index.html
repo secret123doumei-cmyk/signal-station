@@ -17,514 +17,137 @@ body{
   color:var(--text);
   -webkit-text-size-adjust:100%;
 }
+#wrap{max-width:420px;margin:0 auto;padding:12px;height:100vh;display:flex;flex-direction:column;}
+.header{display:flex;flex-direction:column;}
+#t1{font-size:15px}
+#t2{font-size:18px;font-weight:600;margin-top:4px}
+.toprow{display:flex;justify-content:space-between;align-items:center}
+#langbtn{background:var(--btn);color:var(--text);border:1px solid var(--accent);padding:6px;width:44px;font-size:12px}
+.linkbtn{background:var(--btn);color:white;border:1px solid var(--accent);padding:10px;width:100%;text-align:left;font-size:14px;margin-top:6px}
+#bbstitle{margin:10px 0 6px 0;font-size:14px}
+#bbs{flex:1;background:var(--panel);border:1px solid var(--accent);padding:8px;overflow:auto;font-size:13px}
+#post{display:flex;gap:6px;margin-top:8px}
+#nick{width:30%;padding:8px;background:#001a44;color:var(--text);border:1px solid var(--accent)}
+#msg{flex:1;padding:8px;background:#001a44;color:var(--text);border:1px solid var(--accent)}
+#postbtn{background:var(--btn);color:white;border:1px solid var(--accent);padding:8px 10px}
 
-/* container fills screen; stable layout, prevents shifting */
-#wrap{
-  max-width:420px;
-  margin:0 auto;
-  padding:12px;
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-}
+/* flicker防止：追加表示専用アニメ */
+.bubble{display:block;margin:6px 0;padding:8px;border-radius:8px;opacity:0;transform:translateY(6px);animation:fadeIn .25s forwards}
+@keyframes fadeIn{to{opacity:1;transform:none}}
 
-/* top-left two-line title */
-.header{
-  position:relative;
-  display:flex;
-  flex-direction:column;
-  gap:0;
-  user-select:none;
-}
-#t1{font-size:15px; line-height:1;}
-#t2{font-size:18px; line-height:1; margin-top:4px; font-weight:600;}
-
-/* top-right: small lang toggle */
-.toprow{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:8px;
-}
-#langbtn{
-  background:var(--btn);
-  color:var(--text);
-  border:1px solid var(--accent);
-  padding:6px;
-  width:44px;
-  text-align:center;
-  font-size:12px;
-}
-
-/* fixed log box */
-#log{
-  background:var(--panel);
-  border:1px solid var(--accent);
-  padding:8px;
-  height:120px;
-  overflow:auto;
-  margin:10px 0;
-  text-align:left;
-  font-size:13px;
-}
-
-/* action buttons (links) */
-.linkbtn{
-  background:var(--btn);
-  color:white;
-  border:1px solid var(--accent);
-  padding:10px;
-  width:100%;
-  text-align:left;
-  font-size:14px;
-  margin-top:6px;
-}
-
-/* bbs area grows to fill */
-#bbstitle{margin:10px 0 6px 0;font-size:14px;text-align:left}
-#bbs{
-  flex:1 1 auto;
-  background:var(--panel);
-  border:1px solid var(--accent);
-  padding:8px;
-  overflow:auto;
-  text-align:left;
-  font-size:13px;
-}
-
-/* post row fixed at bottom of wrap */
-#post{
-  display:flex;
-  gap:6px;
-  margin-top:8px;
-  flex:0 0 auto;
-  align-items:center;
-}
-#nick{
-  width:30%;
-  padding:8px;
-  background:#001a44;
-  color:var(--text);
-  border:1px solid var(--accent);
-  font-size:13px;
-}
-#msg{
-  flex:1;
-  padding:8px;
-  background:#001a44;
-  color:var(--text);
-  border:1px solid var(--accent);
-  font-size:14px;
-}
-#postbtn{
-  background:var(--btn);
-  color:white;
-  border:1px solid var(--accent);
-  padding:8px 10px;
-  font-size:13px;
-}
-
-/* small helper text */
-.small{font-size:12px;color:#9fe6ff}
-
-/* overlay for rare warning */
-#overlay{
-  position:fixed;
-  inset:0;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  background:rgba(0,0,0,0.88);
-  z-index:9999;
-}
-#overlay .box{
-  border:2px solid #ff8080;
-  padding:18px;
-  color:#ffb3b3;
-  font-family:monospace;
-  text-align:center;
-  max-width:340px;
-  line-height:1.3;
-}
+.bubble.human{background:#0b2347}
+.bubble.alien{background:#062012;color:#bfeedd}
+.bubble.system{background:#071022;color:#ffb3b3}
+.bubble.kiri{background:#002a66;color:#fff;font-weight:600}
+.meta{font-size:11px;color:#9fe6ff;margin-bottom:4px}
 </style>
 </head>
 <body>
 <div id="wrap">
 
-  <div class="toprow">
-    <div class="header" aria-hidden="true">
-      <div id="t1">秘密同盟</div>
-      <div id="t2">音響観測局</div>
-    </div>
-    <button id="langbtn" aria-label="language toggle">EN</button>
-  </div>
-
-  <div id="counter" class="small" style="margin-top:6px"></div>
-  <a id="secretlink" href="#" style="display:none"><button class="linkbtn" id="secretbtn">内部観測室</button></a>
-
-  <div id="log" aria-live="polite" aria-atomic="true"></div>
-
-  <a href="https://secret123doumei-cmyk.github.io/Cyber-Pocket-Synth-Project-Himitsu/" target="_blank" rel="noopener">
-    <button class="linkbtn">シンセを開く</button></a>
-
-  <a href="https://secret123doumei-cmyk.github.io/observer/" target="_blank" rel="noopener">
-    <button class="linkbtn">観測局</button></a>
-
-  <a href="https://www.tiktok.com/@secret123doumei?_r=1&_t=ZS-94BXBnL96ie" target="_blank" rel="noopener">
-    <button class="linkbtn" id="tiktokbtn">記録映像(TikTok)</button></a>
-
-  <div id="bbstitle">掲示板</div>
-  <div id="bbs" aria-live="polite" aria-relevant="additions"></div>
-
-  <div id="post">
-    <input id="nick" placeholder="名前 (任意)" />
-    <input id="msg" placeholder="書き込む / write a note" />
-    <button id="postbtn" onclick="post()">書き込む</button>
-  </div>
-
+<div class="toprow">
+<div class="header">
+<div id="t1">秘密同盟</div>
+<div id="t2">音響観測局</div>
+</div>
+<button id="langbtn">EN</button>
 </div>
 
-<!-- rare overlay -->
-<div id="overlay" onclick="hideOverlay()">
-  <div class="box" id="overlayText">WARNING: UNAUTHORIZED FREQUENCY</div>
+<div id="counter" class="small"></div>
+
+<a href="https://secret123doumei-cmyk.github.io/Cyber-Pocket-Synth-Project-Himitsu/" target="_blank"><button class="linkbtn">シンセを開く</button></a>
+<a href="https://secret123doumei-cmyk.github.io/observer/" target="_blank"><button class="linkbtn">観測局</button></a>
+<a href="https://www.tiktok.com/@secret123doumei?_r=1&_t=ZS-94BXBnL96ie" target="_blank"><button class="linkbtn">記録映像(TikTok)</button></a>
+
+<div id="bbstitle">掲示板</div>
+<div id="bbs"></div>
+
+<div id="post">
+<input id="nick" placeholder="名前">
+<input id="msg" placeholder="書き込む">
+<button id="postbtn">書き込む</button>
+</div>
+
 </div>
 
 <script>
-/* ===== persistent keys & config ===== */
-const KEY_BBS = "sa_bbs_v_final";
-const KEY_LAST_POST = "sa_lastpost_v_final";
-const KEY_LANG = "sa_lang_v_final";
-const KEY_LOGS = "sa_logs_v_final";
-const KEY_NICK = "sa_nick_v_final";
+const KEY="sa_bbs_v_final";
+const MAX=300;
+const bbs=document.getElementById("bbs");
 
-const POST_COOLDOWN = 15000; // 15s
-const MAX_BBS_ITEMS = 100;
-const ALIEN_INTERVAL = 7000;
-const ALIEN_PROB = 0.35;
+/* 保存 */
+function load(){return JSON.parse(localStorage.getItem(KEY)||"[]")}
+function save(arr){localStorage.setItem(KEY,JSON.stringify(arr))}
 
-/* ===== UI texts ===== */
-const UI = {
-  jp:{
-    title1:"秘密同盟",
-    title2:"音響観測局",
-    synth:"シンセを開く",
-    observer:"観測局",
-    tiktok:"記録映像(TikTok)",
-    bbsTitle:"掲示板",
-    postBtn:"書き込む",
-    placeholder:"書き込む",
-    connected:"接続しました",
-    wait:"少し待ってください",
-    visitor:"訪問者",
-    detect:"交信を検出",
-    overlay:"警告：未承認の周波数",
-    secretTitle:"第零観測室",
-    secretBody1:"ここは外部公開されていない領域です",
-    secretBody2:"まだ解析できない信号が残っています",
-  },
-  en:{
-    title1:"Secret Alliance",
-    title2:"Signal Station",
-    synth:"OPEN SYNTH",
-    observer:"OBSERVER",
-    tiktok:"records (TikTok)",
-    bbsTitle:"MESSAGE BOARD",
-    postBtn:"POST",
-    placeholder:"write a note",
-    connected:"connected",
-    wait:"please wait",
-    visitor:"visitor",
-    detect:"incoming transmission",
-    overlay:"WARNING: UNAUTHORIZED FREQUENCY",
-    secretTitle:"Hidden Observation Room",
-    secretBody1:"This area is not publicly exposed",
-    secretBody2:"Unparsed signals remain here",
-  }
-};
+/* 追加描画（←重要：再描画しない） */
+function append(obj){
+ let cls="human";
+ if(obj.name==="system")cls="system";
+ if(/^(k7|ghost|L-7|no-name)$/i.test(obj.name))cls="alien";
+ if(obj.text.includes("観測記録"))cls="kiri";
 
-/* ===== generated vocabulary (for natural logs) ===== */
-const VOCAB = {
-  base_jp: ["信号","ノイズ","反応","応答","周波数","波形","同期","記録","座標","波"],
-  state_jp: ["微弱","不明","安定","断続","強い","近い","遠い","増加","減少"],
-  verb_jp: ["確認","検出","発生","変化","消失","維持","観測"],
-  call_jp: ["聞こえています","まだ接続中です","応答できます","維持してください"],
-  warn_jp: ["位置が近い","切断を推奨","想定外の接続","逆探知が発生"],
-
-  base_en: ["signal","noise","response","ack","frequency","wave","sync","log","coord","spectrum"],
-  state_en: ["weak","unknown","stable","intermittent","strong","near","far","rising","falling"],
-  verb_en: ["confirm","detect","occur","shift","lost","hold","observe"],
-  call_en: ["we hear you","still connected","responding","maintain signal"],
-  warn_en: ["source near","disconnect advised","unexpected link","counter-detection"]
-};
-
-/* helpers */
-function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function pad(n){ return String(n).padStart(2,"0"); }
-function nowTime(){
-  const d = new Date();
-  const y = String(d.getFullYear()).slice(2);
-  const m = pad(d.getMonth()+1);
-  const da = pad(d.getDate());
-  const hh = pad(d.getHours());
-  const mm = pad(d.getMinutes());
-  return `${y}/${m}/${da} ${hh}:${mm}`;
+ const d=document.createElement("div");
+ d.className="bubble "+cls;
+ d.innerHTML=`<div class="meta">[${obj.time}] ${obj.name}</div>${obj.text}`;
+ bbs.appendChild(d);
+ bbs.scrollTop=bbs.scrollHeight;
+ while(bbs.children.length>MAX)bbs.removeChild(bbs.firstChild);
 }
 
-/* ===== state init ===== */
-let lang = localStorage.getItem(KEY_LANG) || "jp";
-let lastPostTime = Number(localStorage.getItem(KEY_LAST_POST) || 0);
-let startTs = Date.now();
-
-/* elements */
-const t1 = document.getElementById("t1");
-const t2 = document.getElementById("t2");
-const langbtn = document.getElementById("langbtn");
-const counterEl = document.getElementById("counter");
-const secretlink = document.getElementById("secretlink");
-const secretbtn = document.getElementById("secretbtn");
-const logEl = document.getElementById("log");
-const bbsEl = document.getElementById("bbs");
-const nickInput = document.getElementById("nick");
-const msgInput = document.getElementById("msg");
-const postBtn = document.getElementById("postbtn");
-const tiktokBtn = document.getElementById("tiktokbtn");
-const overlay = document.getElementById("overlay");
-const overlayText = document.getElementById("overlayText");
-
-/* restore nick */
-const savedNick = localStorage.getItem(KEY_NICK);
-if(savedNick) nickInput.value = savedNick;
-
-/* ===== logging (generated) storage ===== */
-let generatedLogs = JSON.parse(localStorage.getItem(KEY_LOGS) || "[]");
-function renderLogs(){ logEl.innerHTML = generatedLogs.slice(0,40).map(l => `<div>${l}</div>`).join(""); }
-function pushLogLine(line){
-  generatedLogs.unshift(`[${nowTime()}] ${line}`);
-  if(generatedLogs.length > 300) generatedLogs.length = 300;
-  localStorage.setItem(KEY_LOGS, JSON.stringify(generatedLogs));
-  renderLogs();
+/* 初回ロードのみ全描画 */
+function init(){
+ const arr=load().slice().reverse();
+ arr.forEach(append);
+}
+  function now(){
+ const d=new Date();
+ return String(d.getHours()).padStart(2,'0')+":"+String(d.getMinutes()).padStart(2,'0');
 }
 
-/* initial boot line */
-function initialBoot(){
-  const pick = (lang==="jp") ? rand(VOCAB.call_jp) : rand(VOCAB.call_en);
-  pushLogLine(pick);
+/* 投稿 */
+document.getElementById("postbtn").onclick=function(){
+ const name=document.getElementById("nick").value||"訪問者";
+ const text=document.getElementById("msg").value;
+ if(!text)return;
+
+ const obj={name,text,time:now()};
+ const arr=load();
+ arr.unshift(obj);
+ save(arr);
+
+ append(obj);
+ document.getElementById("msg").value="";
 }
 
-/* ===== sentence generator (time-based unlocking) ===== */
-function genSentence(){
-  const elapsed = (Date.now() - startTs) / 1000;
-  const isJP = (lang === "jp");
+/* 会話生成（チカチカしないよう間隔固定） */
+const NAMES=["k7","observer","ops","ghost","L-7","relay","night"];
+const LINES=[
+"ログ取りました",
+"安定してます",
+"異常なし",
+"そのままでOK",
+"コーヒー冷めた",
+"今日は静か",
+"記録だけ残します",
+"受信中です",
+"誰かいます？"
+];
 
-  if(isJP){
-    if(elapsed < 20) return `${rand(VOCAB.base_jp)}を${rand(VOCAB.verb_jp)}`;
-    if(elapsed < 60) return Math.random() < 0.7 ? `${rand(VOCAB.state_jp)}な${rand(VOCAB.base_jp)}を${rand(VOCAB.verb_jp)}` : rand(VOCAB.call_jp);
-    if(elapsed < 120) return Math.random() < 0.8 ? `${rand(VOCAB.state_jp)}な${rand(VOCAB.base_jp)}を${rand(VOCAB.verb_jp)}` : rand(VOCAB.warn_jp);
-    return Math.random() < 0.85 ? `${rand(VOCAB.state_jp)}な${rand(VOCAB.base_jp)}を${rand(VOCAB.verb_jp)}` : rand(VOCAB.warn_jp);
-  } else {
-    if(elapsed < 20) return `${rand(VOCAB.base_en)} ${rand(VOCAB.verb_en)}`;
-    if(elapsed < 60) return Math.random() < 0.7 ? `${rand(VOCAB.state_en)} ${rand(VOCAB.base_en)} ${rand(VOCAB.verb_en)}` : rand(VOCAB.call_en);
-    if(elapsed < 120) return Math.random() < 0.8 ? `${rand(VOCAB.state_en)} ${rand(VOCAB.base_en)} ${rand(VOCAB.verb_en)}` : rand(VOCAB.warn_en);
-    return Math.random() < 0.85 ? `${rand(VOCAB.state_en)} ${rand(VOCAB.base_en)} ${rand(VOCAB.verb_en)}` : rand(VOCAB.warn_en);
-  }
+function auto(){
+ const obj={
+  name:NAMES[Math.floor(Math.random()*NAMES.length)],
+  text:LINES[Math.floor(Math.random()*LINES.length)],
+  time:now()
+ };
+ const arr=load();
+ arr.unshift(obj);
+ save(arr);
+ append(obj);
 }
 
-/* timed generator for logs */
-setInterval(()=>{
-  // produce a log line referencing current lang each time
-  if(Math.random() < 0.85){
-    let p = Math.random();
-    if(p < 0.6){
-      pushLogLine(genSentence());
-    } else if(p < 0.92){
-      pushLogLine(lang==="jp" ? "まだ観測中です" : "monitoring");
-    } else {
-      pushLogLine(lang==="jp" ? "不明な反応" : "unknown response");
-    }
-  }
-}, 6000);
+setInterval(auto,4500+Math.random()*3500);
 
-/* rare full-screen overlay event */
-setInterval(()=>{
-  if(Math.random() < 0.01){
-    showOverlay();
-    pushLogLine(lang==="jp" ? "重大な異常を検出" : "critical anomaly detected");
-    setTimeout(hideOverlay, 3000);
-  }
-}, 10000);
-
-/* overlay controls */
-function showOverlay(){ overlay.style.display = "flex"; }
-function hideOverlay(){ overlay.style.display = "none"; }
-
-/* ===== BBS system (with timestamps, nick, cooldown, retention) ===== */
-function getBBSArray(){
-  try{
-    return JSON.parse(localStorage.getItem(KEY_BBS)) || [];
-  }catch(e){
-    return [];
-  }
-}
-function saveBBSArray(arr){
-  if(arr.length > MAX_BBS_ITEMS) arr.length = MAX_BBS_ITEMS;
-  localStorage.setItem(KEY_BBS, JSON.stringify(arr));
-  renderBBS(arr);
-}
-function renderBBS(arr){
-  bbsEl.innerHTML = arr.map(item => `<div>[${item.time}] <b>${escapeHtml(item.name)}</b>: ${escapeHtml(item.text)}</div>`).join("");
-  bbsEl.scrollTop = bbsEl.scrollHeight;
-}
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-
-/* add BBS entry object */
-function addBBS(name,text){
-  const arr = getBBSArray();
-  arr.unshift({time: nowTime(), name: name, text: text});
-  saveBBSArray(arr);
-}
-
-/* post handler with cooldown and nick saving */
-function post(){
-  const now = Date.now();
-  if(now - lastPostTime < POST_COOLDOWN){
-    pushLogLine(UI[lang].wait);
-    return;
-  }
-  const rawName = (nickInput.value || "").trim();
-  const name = rawName || (lang==="jp" ? UI.jp.visitor : UI.en.visitor);
-  const text = (msgInput.value || "").trim();
-  if(!text) return;
-  // save nick
-  if(rawName) localStorage.setItem(KEY_NICK, rawName);
-  // add
-  addBBS(name, text);
-  // record log
-  pushLogLine((lang==="jp" ? "掲示板に書き込み" : "bbs post") + ` (${name})`);
-  lastPostTime = now;
-  localStorage.setItem(KEY_LAST_POST, String(lastPostTime));
-  msgInput.value = "";
-}
-
-/* auto alien posts (always use current lang at generation time) */
-const alienNames = ["no-name","k7","波形","0-3","観測側","observer","Ken"];
-const alienJP = ["こちらは受信中","維持してください","まだ早いです","三回目です","反応を確認"];
-const alienEN = ["maintain signal","not yet","third time","receiving","response ok"];
-
-setInterval(()=>{
-  if(Math.random() < ALIEN_PROB){
-    const name = rand(alienNames);
-    const text = (lang==="jp") ? rand(alienJP) : rand(alienEN);
-    addBBS(name, text);
-    pushLogLine(lang==="jp" ? `交信と思しき書き込み (${name})` : `possible contact post (${name})`);
-  }
-}, ALIEN_INTERVAL);
-
-/* load existing BBS to UI on start */
-function loadBBS(){
-  const arr = getBBSArray();
-  renderBBS(arr);
-}
-
-/* ===== visit counter + kiriban + secret link ===== */
-let visit = Number(localStorage.getItem("visit") || 0) + 1;
-localStorage.setItem("visit", String(visit));
-counterEl.textContent = (lang==="jp" ? "あなたは " : "You are visitor #") + visit + (lang==="jp" ? " 人目の観測者です" : "");
-
-const KIRI = [100,333,666,1000];
-if(KIRI.includes(visit)){
-  pushLogLine(lang==="jp" ? "キリ番を観測しました" : "milestone observed");
-  const arr = getBBSArray();
-  arr.unshift({time: nowTime(), name: "system", text: `[${visit}] の観測記録`});
-  saveBBSArray(arr);
-  secretlink.style.display = "block";
-}
-
-/* secret link behavior (internal room) */
-secretlink.addEventListener("click", function(e){
-  e.preventDefault();
-  document.body.innerHTML = `
-    <div style="background:black;color:#8fd3ff;height:100vh;padding:20px;font-family:monospace">
-      <h2>${UI[lang].secretTitle}</h2>
-      <p>${UI[lang].secretBody1}</p>
-      <p>${UI[lang].secretBody2}</p>
-      <button style="margin-top:12px;padding:10px;border:1px solid #6faeff;background:#001133;color:#fff;font-family:monospace" onclick="location.reload()">戻る</button>
-    </div>
-  `;
-});
-
-/* ===== UI apply and language toggle (complete) ===== */
-function applyUI(){
-  // titles
-  t1.textContent = UI[lang].title1;
-  t2.textContent = UI[lang].title2;
-  // small lang btn label
-  langbtn.textContent = (lang === "jp") ? "EN" : "JP";
-  // tiktok button
-  if(tiktokBtn) tiktokBtn.textContent = UI[lang].tiktok;
-  // post placeholders & button
-  postBtn.textContent = UI[lang].postBtn;
-  msgInput.placeholder = UI[lang].placeholder;
-  // counter text refresh
-  counterEl.textContent = (lang==="jp" ? "あなたは " : "You are visitor #") + visit + (lang==="jp" ? " 人目の観測者です" : "");
-  // overlay text
-  const ov = document.getElementById("overlayText");
-  if(ov) ov.textContent = UI[lang].overlay || UI[lang].overlayText;
-}
-
-/* toggle action */
-langbtn.addEventListener("click", function(){
-  lang = (lang === "jp") ? "en" : "jp";
-  localStorage.setItem(KEY_LANG, lang);
-  applyUI();
-  pushLogLine(lang==="jp" ? "日本語に切替" : "switched to EN");
-  // reload BBS rendering so names/dates unaffected (BBS content itself is language-neutral)
-  loadBBS();
-});
-
-/* ===== small helpers & init ===== */
-function nowTime(){ return nowTime = nowTime || (()=>{ /* placeholder to avoid linter shadow*/ }) , (new Date(), (function(){ const d=new Date(); return `${String(d.getFullYear()).slice(2)}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`})()); }
-
-/* Because we defined nowTime above, but used a local one earlier, define a simple function nowTime used by BBS */
-function nowTime(){
-  const d=new Date();
-  const y = String(d.getFullYear()).slice(2);
-  const m = pad(d.getMonth()+1);
-  const da = pad(d.getDate());
-  const hh = pad(d.getHours());
-  const mm = pad(d.getMinutes());
-  return `${y}/${m}/${da} ${hh}:${mm}`;
-}
-
-/* expose pad to global scope used above */
-function pad(n){ return String(n).padStart(2,'0'); }
-
-function escapeHtmlSimple(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-
-/* initialize logs/BBS/UI */
-applyUI();
-initialBoot();
-renderLogs();
-loadBBS();
-
-/* restore lastPostTime */
-lastPostTime = Number(localStorage.getItem(KEY_LAST_POST) || lastPostTime);
-
-/* expose post to window so onclick in HTML works */
-window.post = post;
-
-/* allow Enter key to post (no shift) */
-msgInput.addEventListener("keydown", function(e){
-  if(e.key === "Enter" && !e.shiftKey){
-    e.preventDefault();
-    post();
-  }
-});
-
-/* small accessibility: clicking overlay hides */
-overlay.addEventListener("click", hideOverlay);
-
+init();
 </script>
 </body>
 </html>
